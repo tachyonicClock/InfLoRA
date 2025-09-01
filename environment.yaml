@@ -1,8 +1,6 @@
-name: python3_8
+name: python3_10
 channels:
   - pytorch
-  - https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/conda-forge
-  - https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/main
   - conda-forge
   - defaults
 dependencies:
@@ -497,4 +495,3 @@ dependencies:
       - zope-deprecation==4.4.0
       - zope-interface==5.4.0
       - zope-sqlalchemy==1.6
-prefix: /home/liangys/anaconda3/envs/python3_8
