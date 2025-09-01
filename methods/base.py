@@ -6,8 +6,9 @@ import torch
 from scipy.spatial.distance import cdist
 from torch import nn
 from torch.utils.data import DataLoader
-
-from utils.toolkit import accuracy, tensor2numpy
+from utils.toolkit import tensor2numpy, accuracy
+from scipy.spatial.distance import cdist
+from torchmetrics.classification import MulticlassCalibrationError
 
 EPSILON = 1e-8
 batch_size = 64
@@ -82,12 +83,10 @@ class BaseLearner(object):
         return ret
 
     def eval_task(self):
-        y_pred, y_pred_with_task, y_true, y_pred_task, y_true_task = self._eval_cnn(
-            self.test_loader
-        )
-        cnn_accy = self._evaluate(y_pred, y_true)
-        cnn_accy_with_task = self._evaluate(y_pred_with_task, y_true)
-        cnn_accy_task = (y_pred_task == y_true_task).sum().item() / len(y_pred_task)
+        results = self._eval_cnn(self.test_loader)
+        cnn_accy = self._evaluate(results["y_pred"], results["y_true"])
+        cnn_accy_with_task = self._evaluate(results["y_pred_with_task"], results["y_true"])
+        cnn_accy_task = (results["y_pred_task"] == results["y_true_task"]).sum().item()/len(results["y_pred_task"])
 
         if hasattr(self, "_class_means"):
             y_pred, y_true = self._eval_nme(self.test_loader, self._class_means)
@@ -95,7 +94,7 @@ class BaseLearner(object):
         else:
             nme_accy = None
 
-        return cnn_accy, cnn_accy_with_task, nme_accy, cnn_accy_task
+        return cnn_accy, cnn_accy_with_task, nme_accy, cnn_accy_task, results["ece"]
 
     def incremental_train(self):
         pass
@@ -123,19 +122,7 @@ class BaseLearner(object):
         return np.around(tensor2numpy(correct) * 100 / total, decimals=2)
 
     def _eval_cnn(self, loader):
-        self._network.eval()
-        y_pred, y_true = [], []
-        for _, (_, inputs, targets) in enumerate(loader):
-            inputs = inputs.to(self._device)
-            with torch.no_grad():
-                outputs = self._network(inputs)["logits"]
-            predicts = torch.topk(
-                outputs, k=self.topk, dim=1, largest=True, sorted=True
-            )[1]  # [bs, topk]
-            y_pred.append(predicts.cpu().numpy())
-            y_true.append(targets.cpu().numpy())
-
-        return np.concatenate(y_pred), np.concatenate(y_true)  # [N, topk]
+        raise NotImplementedError()
 
     def _eval_nme(self, loader, class_means):
         self._network.eval()

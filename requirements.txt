@@ -5,3 +5,5 @@ tqdm
 ipdb
 numpy
 scikit-learn
+pyyaml
+torchmetrics

@@ -10,6 +10,7 @@ import torch
 from utils import factory
 from utils.data_manager import DataManager
 from utils.toolkit import count_parameters
+import csv
 
 
 def train(args):
@@ -88,12 +89,11 @@ def _train(args):
     args["class_order"] = data_manager._class_order
     model = factory.get_model(args["model_name"], args)
 
-    cnn_curve, cnn_curve_with_task, nme_curve, cnn_curve_task = (
-        {"top1": []},
-        {"top1": []},
-        {"top1": []},
-        {"top1": []},
-    )
+    csv_file = open(logfilename + '.csv', 'w')
+    csv_log = csv.writer(csv_file)
+    csv_log.writerow(['task', 'cnn_accy', 'cnn_accy_with_task', 'cnn_accy_task', 'ece'])
+
+    cnn_curve, cnn_curve_with_task, nme_curve, cnn_curve_task = {'top1': []}, {'top1': []}, {'top1': []}, {'top1': []}
     for task in range(data_manager.nb_tasks):
         logging.info("All params: {}".format(count_parameters(model._network)))
         logging.info(
@@ -104,21 +104,23 @@ def _train(args):
         time_end = time.time()
         logging.info("Time:{}".format(time_end - time_start))
         time_start = time.time()
-        cnn_accy, cnn_accy_with_task, nme_accy, cnn_accy_task = model.eval_task()
+        cnn_accy, cnn_accy_with_task, nme_accy, cnn_accy_task, ece = model.eval_task()
         time_end = time.time()
         logging.info("Time:{}".format(time_end - time_start))
         # raise Exception
         model.after_task()
 
-        logging.info("CNN: {}".format(cnn_accy["grouped"]))
-        cnn_curve["top1"].append(cnn_accy["top1"])
-        cnn_curve_with_task["top1"].append(cnn_accy_with_task["top1"])
-        cnn_curve_task["top1"].append(cnn_accy_task)
-        logging.info("CNN top1 curve: {}".format(cnn_curve["top1"]))
-        logging.info("CNN top1 with task curve: {}".format(cnn_curve_with_task["top1"]))
-        logging.info("CNN top1 task curve: {}".format(cnn_curve_task["top1"]))
+        cnn_curve['top1'].append(cnn_accy['top1'])
+        cnn_curve_with_task['top1'].append(cnn_accy_with_task['top1'])
+        cnn_curve_task['top1'].append(cnn_accy_task)
 
-        # if task >= 3: break
+        logging.info('CNN: {}'.format(cnn_accy['grouped']))
+        logging.info('CNN top1 curve: {}'.format(cnn_curve['top1']))
+        logging.info('CNN top1 with task curve: {}'.format(cnn_curve_with_task['top1']))
+        logging.info('CNN top1 task curve: {}'.format(cnn_curve_task['top1']))
+        logging.info('ECE: {:.3f}'.format(ece))
+        csv_log.writerow([task, cnn_accy['top1'], cnn_accy_with_task['top1'], cnn_accy_task, ece])
+        csv_file.flush()
 
         torch.save(
             model._network.state_dict(),

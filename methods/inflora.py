@@ -15,8 +15,9 @@ from methods.base import BaseLearner
 from models.sinet_inflora import SiNet
 from models.vit_inflora import Attention_LoRA
 from utils.schedulers import CosineSchedule
-from utils.toolkit import accuracy, tensor2numpy
-
+import ipdb
+import math
+from torchmetrics.classification import MulticlassCalibrationError
 
 class InfLoRA(BaseLearner):
     def __init__(self, args):
@@ -105,7 +106,6 @@ class InfLoRA(BaseLearner):
         self._network.to(self._device)
         # if self._old_network is not None:
         #     self._old_network.to(self._device)
-
         for name, param in self._network.named_parameters():
             param.requires_grad_(False)
             try:
@@ -255,10 +255,8 @@ class InfLoRA(BaseLearner):
             # Projection Matrix Precomputation
             self.feature_mat = []
             for p in range(len(self.feature_list)):
-                Uf = torch.Tensor(
-                    np.dot(self.feature_list[p], self.feature_list[p].transpose())
-                )
-                print("Layer {} - Projection Matrix shape: {}".format(p + 1, Uf.shape))
+                Uf=torch.Tensor(np.dot(self.feature_list[p],self.feature_list[p].T))
+                print('Layer {} - Projection Matrix shape: {}'.format(p+1,Uf.shape))
                 self.feature_mat.append(Uf)
 
         return
@@ -336,9 +334,12 @@ class InfLoRA(BaseLearner):
         y_pred, y_true = [], []
         y_pred_with_task = []
         y_pred_task, y_true_task = [], []
+        ece = MulticlassCalibrationError(num_classes=(self._total_classes))
+
         for _, (_, inputs, targets) in enumerate(loader):
             inputs = inputs.to(self._device)
             targets = targets.to(self._device)
+            tasks = targets // self.class_num
 
             with torch.no_grad():
                 y_true_task.append((targets // self.class_num).cpu())
@@ -362,18 +363,22 @@ class InfLoRA(BaseLearner):
                 predicts_with_task + (targets // self.class_num) * self.class_num
             )
 
+            # Only calculate ECE for the classes seen so far
+            ece.update(outputs, targets)
+
             # print(predicts.shape)
             y_pred.append(predicts.cpu().numpy())
             y_pred_with_task.append(predicts_with_task.cpu().numpy())
             y_true.append(targets.cpu().numpy())
 
-        return (
-            np.concatenate(y_pred),
-            np.concatenate(y_pred_with_task),
-            np.concatenate(y_true),
-            torch.cat(y_pred_task),
-            torch.cat(y_true_task),
-        )  # [N, topk]
+        return {
+            "y_pred": np.concatenate(y_pred),
+            "y_pred_with_task": np.concatenate(y_pred_with_task),
+            "y_true": np.concatenate(y_true),
+            "y_pred_task": torch.cat(y_pred_task),
+            "y_true_task": torch.cat(y_true_task),
+            "ece": ece.compute().item()
+        }  
 
     def _compute_accuracy_domain(self, model, loader):
         model.eval()
@@ -418,11 +423,8 @@ class InfLoRA(BaseLearner):
                     U1, S1, Vh1 = np.linalg.svd(activation, full_matrices=False)
                     sval_total = (S1**2).sum()
                     # Projected Representation (Eq-8)
-                    act_hat = activation - np.dot(
-                        np.dot(self.feature_list[i], self.feature_list[i].transpose()),
-                        activation,
-                    )
-                    U, S, Vh = np.linalg.svd(act_hat, full_matrices=False)
+                    act_hat = activation - np.dot(np.dot(self.feature_list[i],self.feature_list[i].T),activation)
+                    U,S,Vh = np.linalg.svd(act_hat, full_matrices=False)
                     # criteria (Eq-9)
                     sval_hat = (S**2).sum()
                     sval_ratio = (S**2) / sval_total
@@ -450,11 +452,8 @@ class InfLoRA(BaseLearner):
                     U1, S1, Vh1 = np.linalg.svd(activation, full_matrices=False)
                     sval_total = (S1**2).sum()
                     # Projected Representation (Eq-8)
-                    act_hat = np.dot(
-                        np.dot(self.feature_list[i], self.feature_list[i].transpose()),
-                        activation,
-                    )
-                    U, S, Vh = np.linalg.svd(act_hat, full_matrices=False)
+                    act_hat = np.dot(np.dot(self.feature_list[i],self.feature_list[i].T),activation)
+                    U,S,Vh = np.linalg.svd(act_hat, full_matrices=False)
                     # criteria (Eq-9)
                     sval_hat = (S**2).sum()
                     sval_ratio = (S**2) / sval_total
@@ -472,9 +471,7 @@ class InfLoRA(BaseLearner):
                         continue
 
                     # update GPM by Projected Representation (Eq-8)
-                    act_feature = self.feature_list[i] - np.dot(
-                        np.dot(U[:, 0:r], U[:, 0:r].transpose()), self.feature_list[i]
-                    )
+                    act_feature = self.feature_list[i] - np.dot(np.dot(U[:,0:r],U[:,0:r].T),self.feature_list[i])
                     Ui, Si, Vi = np.linalg.svd(act_feature)
                     self.feature_list[i] = Ui[:, : self.feature_list[i].shape[1] - r]
 
@@ -526,11 +523,8 @@ class InfLoRA(BaseLearner):
                 U1, S1, Vh1 = np.linalg.svd(activation, full_matrices=False)
                 sval_total = (S1**2).sum()
                 # Projected Representation (Eq-8)
-                act_hat = activation - np.dot(
-                    np.dot(self.feature_list[i], self.feature_list[i].transpose()),
-                    activation,
-                )
-                U, S, Vh = np.linalg.svd(act_hat, full_matrices=False)
+                act_hat = activation - np.dot(np.dot(self.feature_list[i],self.feature_list[i].T),activation)
+                U,S,Vh = np.linalg.svd(act_hat, full_matrices=False)
                 # criteria (Eq-9)
                 sval_hat = (S**2).sum()
                 sval_ratio = (S**2) / sval_total
