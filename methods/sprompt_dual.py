@@ -31,7 +31,7 @@ class SPrompts_dual(BaseLearner):
         self.init_weight_decay = args["init_weight_decay"]
         self.epochs = args["epochs"]
         self.lrate = args["lrate"]
-        self.lrate_decay = args["lrate_decay"]
+        # self.lrate_decay = args["lrate_decay"]
         self.batch_size = args["batch_size"]
         self.weight_decay = args["weight_decay"]
         self.num_workers = args["num_workers"]

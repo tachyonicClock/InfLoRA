@@ -41,7 +41,7 @@ class InfLoRA_CA(BaseLearner):
         self.init_weight_decay = args["init_weight_decay"]
         self.epochs = args["epochs"]
         self.lrate = args["lrate"]
-        self.lrate_decay = args["lrate_decay"]
+        # self.lrate_decay = args["lrate_decay"]
         self.batch_size = args["batch_size"]
         self.weight_decay = args["weight_decay"]
         self.num_workers = args["num_workers"]
@@ -81,11 +81,20 @@ class InfLoRA_CA(BaseLearner):
             "Learning on {}-{}".format(self._known_classes, self._total_classes)
         )
 
-        train_dataset = data_manager.get_dataset(np.arange(self._known_classes, self._total_classes), source='train', mode='train')
-        self.train_loader = DataLoader(train_dataset, batch_size=self.batch_size, shuffle=True,
-                                       num_workers=self.num_workers, pin_memory=True)
+        train_dataset = data_manager.get_dataset(
+            np.arange(self._known_classes, self._total_classes),
+            source="train",
+            mode="train",
+        )
+        self.train_loader = DataLoader(
+            train_dataset,
+            batch_size=self.batch_size,
+            shuffle=True,
+            num_workers=self.num_workers,
+            pin_memory=True,
+        )
         self._train(self.train_loader, self.test_loader)
-        self.clustering(self.train_loader)        
+        self.clustering(self.train_loader)
         self._compute_class_mean(data_manager, check_diff=False, oracle=False)
         if self._cur_task > 0:
             self._stage2_compact_classifier(self.task_sizes[-1])

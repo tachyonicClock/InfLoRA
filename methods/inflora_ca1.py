@@ -38,7 +38,7 @@ class InfLoRA_CA1(BaseLearner):
         self.init_epoch = args["init_epoch"]
         self.epochs = args["epochs"]
         self.lrate = args["lrate"]
-        self.lrate_decay = args["lrate_decay"]
+        #self.lrate_decay = args["lrate_decay"]
         self.batch_size = args["batch_size"]
         self.weight_decay = args["weight_decay"]
         self.num_workers = args["num_workers"]
@@ -233,24 +233,12 @@ class InfLoRA_CA1(BaseLearner):
         }
         network_params = [base_params, base_fc_params]
 
-        if self.optim == "sgd":
-            optimizer = optim.SGD(
-                network_params,
-                lr=self.lrate,
-                momentum=0.9,
-                weight_decay=self.weight_decay,
-            )
-            scheduler = optim.lr_scheduler.MultiStepLR(
-                optimizer=optimizer, milestones=[18], gamma=self.lrate_decay
-            )
-        elif self.optim == "adam":
-            optimizer = optim.Adam(
-                self._network.parameters(),
-                lr=self.lrate,
-                weight_decay=self.weight_decay,
-                betas=(0.9, 0.999),
-            )
-            scheduler = CosineSchedule(optimizer=optimizer, K=self.epochs)
+        if self.optim == 'sgd':
+            optimizer = optim.SGD(network_params, lr=self.lrate, momentum=0.9, weight_decay=self.weight_decay)
+            scheduler = optim.lr_scheduler.MultiStepLR(optimizer=optimizer, milestones=[18], gamma=#self.lrate_decay)
+        elif self.optim == 'adam':
+            optimizer = optim.Adam(self._network.parameters(),lr=self.lrate,weight_decay=self.weight_decay, betas=(0.9,0.999))
+            scheduler = CosineSchedule(optimizer=optimizer,K=self.epochs)
         else:
             raise NotImplementedError
 

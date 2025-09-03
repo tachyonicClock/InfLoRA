@@ -27,7 +27,7 @@ net_type: sip
 num_heads: 12
 
 # Method
-model_name: InfLoRA
+model_name: InfLoRA_domain
 rank: 10   # set based on supplementary of (Liang & Li, 2024)
 lamb: 0.95 # set based on supplementary of (Liang & Li, 2024)
 lame: 1
