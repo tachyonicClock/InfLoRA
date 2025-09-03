@@ -195,6 +195,16 @@ class SPrompts_coda(BaseLearner):
         ret["top1"] = grouped["total"]
         return ret
 
+    def predict(self, x: torch.Tensor) -> torch.Tensor:
+        feature = self._network.extract_vector(x)
+        y_hat = self._network.interface(x, feature)
+        # pad with zeros if < self._max_classes
+        if y_hat.shape[1] < self._max_classes:
+            padding = torch.zeros(y_hat.shape[0], self._max_classes - y_hat.shape[1]).to(self._device)
+            y_hat = torch.cat((y_hat, padding), dim=1)
+        return y_hat
+
+
     def _eval_cnn(self, loader):
         self._network.eval()
         y_pred, y_true = [], []
