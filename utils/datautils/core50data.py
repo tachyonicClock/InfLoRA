@@ -11,25 +11,23 @@
 # Website: vincenzolomonaco.com                                                #
 ################################################################################
 
-""" Data Loader for the CORe50 Dataset """
+"""Data Loader for the CORe50 Dataset"""
 
 # Python 2-3 compatible
-from __future__ import print_function
-from __future__ import division
-from __future__ import absolute_import
+from __future__ import absolute_import, division, print_function
+
+import logging
+import os
+import pickle as pkl
+from hashlib import md5
 
 # other imports
 import numpy as np
-import pickle as pkl
-import os
-import logging
-from hashlib import md5
 from PIL import Image
-import ipdb
 
 
 class CORE50(object):
-    """ CORe50 Data Loader calss
+    """CORe50 Data Loader calss
     Args:
         root (string): Root directory of the dataset where ``core50_128x128``,
             ``paths.pkl``, ``LUP.pkl``, ``labels.pkl``, ``core50_imgs.npz``
@@ -54,17 +52,18 @@ class CORE50(object):
     """
 
     nbatch = {
-        'ni': 8,
-        'nc': 9,
-        'nic': 79,
-        'nicv2_79': 79,
-        'nicv2_196': 196,
-        'nicv2_391': 391
+        "ni": 8,
+        "nc": 9,
+        "nic": 79,
+        "nicv2_79": 79,
+        "nicv2_196": 196,
+        "nicv2_391": 391,
     }
 
-    def __init__(self, root='', preload=False, scenario='ni', cumul=False,
-                 run=0, start_batch=0):
-        """" Initialize Object """
+    def __init__(
+        self, root="", preload=False, scenario="ni", cumul=False, run=0, start_batch=0
+    ):
+        """ " Initialize Object"""
 
         self.root = os.path.expanduser(root)
         self.preload = preload
@@ -75,36 +74,34 @@ class CORE50(object):
 
         if preload:
             print("Loading data...")
-            bin_path = os.path.join(root, 'core50_imgs.bin')
+            bin_path = os.path.join(root, "core50_imgs.bin")
             if os.path.exists(bin_path):
-                with open(bin_path, 'rb') as f:
-                    self.x = np.fromfile(f, dtype=np.uint8) \
-                        .reshape(164866, 128, 128, 3)
+                with open(bin_path, "rb") as f:
+                    self.x = np.fromfile(f, dtype=np.uint8).reshape(164866, 128, 128, 3)
 
             else:
-                with open(os.path.join(root, 'core50_imgs.npz'), 'rb') as f:
+                with open(os.path.join(root, "core50_imgs.npz"), "rb") as f:
                     npzfile = np.load(f)
-                    self.x = npzfile['x']
+                    self.x = npzfile["x"]
                     print("Writing bin for fast reloading...")
                     self.x.tofile(bin_path)
 
         print("Loading paths...")
-        with open(os.path.join(root, 'paths.pkl'), 'rb') as f:
+        with open(os.path.join(root, "paths.pkl"), "rb") as f:
             self.paths = pkl.load(f)
 
         print("Loading LUP...")
-        with open(os.path.join(root, 'LUP.pkl'), 'rb') as f:
+        with open(os.path.join(root, "LUP.pkl"), "rb") as f:
             self.LUP = pkl.load(f)
 
         print("Loading labels...")
-        with open(os.path.join(root, 'labels.pkl'), 'rb') as f:
+        with open(os.path.join(root, "labels.pkl"), "rb") as f:
             self.labels = pkl.load(f)
 
     def __iter__(self):
         return self
 
     def get_data_batchidx(self, idx):
-
         scen = self.scenario
         run = self.run
         batch = idx
@@ -122,8 +119,7 @@ class CORE50(object):
 
         # loading data
         if self.preload:
-            train_x = np.take(self.x, train_idx_list, axis=0)\
-                      .astype(np.float32)
+            train_x = np.take(self.x, train_idx_list, axis=0).astype(np.float32)
         else:
             print("Loading data...")
             # Getting the actual paths
@@ -146,8 +142,8 @@ class CORE50(object):
         return (train_x, train_y)
 
     def __next__(self):
-        """ Next batch based on the object parameter which can be also changed
-            from the previous iteration. """
+        """Next batch based on the object parameter which can be also changed
+        from the previous iteration."""
 
         scen = self.scenario
         run = self.run
@@ -169,8 +165,7 @@ class CORE50(object):
 
         # loading data
         if self.preload:
-            train_x = np.take(self.x, train_idx_list, axis=0)\
-                      .astype(np.float32)
+            train_x = np.take(self.x, train_idx_list, axis=0).astype(np.float32)
         else:
             print("Loading data...")
             # Getting the actual paths
@@ -198,7 +193,7 @@ class CORE50(object):
         return (train_x, train_y)
 
     def get_test_set(self):
-        """ Return the test set (the same for each inc. batch). """
+        """Return the test set (the same for each inc. batch)."""
 
         scen = self.scenario
         run = self.run
@@ -226,20 +221,21 @@ class CORE50(object):
     next = __next__  # python2.x compatibility.
 
     @staticmethod
-    def get_batch_from_paths(paths, compress=False, snap_dir='',
-                             on_the_fly=True, verbose=False):
-        """ Given a number of abs. paths it returns the numpy array
-        of all the images. """
+    def get_batch_from_paths(
+        paths, compress=False, snap_dir="", on_the_fly=True, verbose=False
+    ):
+        """Given a number of abs. paths it returns the numpy array
+        of all the images."""
 
         # Getting root logger
-        log = logging.getLogger('mylogger')
+        log = logging.getLogger("mylogger")
 
         # If we do not process data on the fly we check if the same train
         # filelist has been already processed and saved. If so, we load it
         # directly. In either case we end up returning x and y, as the full
         # training set and respective labels.
         num_imgs = len(paths)
-        hexdigest = md5(''.join(paths).encode('utf-8')).hexdigest()
+        hexdigest = md5("".join(paths).encode("utf-8")).hexdigest()
         log.debug("Paths Hex: " + str(hexdigest))
         loaded = False
         x = None
@@ -249,16 +245,15 @@ class CORE50(object):
             file_path = snap_dir + hexdigest + ".npz"
             if os.path.exists(file_path) and not on_the_fly:
                 loaded = True
-                with open(file_path, 'rb') as f:
+                with open(file_path, "rb") as f:
                     npzfile = np.load(f)
-                    x, y = npzfile['x']
+                    x, y = npzfile["x"]
         else:
             x_file_path = snap_dir + hexdigest + "_x.bin"
             if os.path.exists(x_file_path) and not on_the_fly:
                 loaded = True
-                with open(x_file_path, 'rb') as f:
-                    x = np.fromfile(f, dtype=np.uint8) \
-                        .reshape(num_imgs, 128, 128, 3)
+                with open(x_file_path, "rb") as f:
+                    x = np.fromfile(f, dtype=np.uint8).reshape(num_imgs, 128, 128, 3)
 
         # Here we actually load the images.
         if not loaded:
@@ -267,7 +262,7 @@ class CORE50(object):
 
             for i, path in enumerate(paths):
                 if verbose:
-                    print("\r" + path + " processed: " + str(i + 1), end='')
+                    print("\r" + path + " processed: " + str(i + 1), end="")
                 x[i] = np.array(Image.open(path))
 
             if verbose:
@@ -276,12 +271,11 @@ class CORE50(object):
             if not on_the_fly:
                 # Then we save x
                 if compress:
-                    with open(file_path, 'wb') as g:
+                    with open(file_path, "wb") as g:
                         np.savez_compressed(g, x=x)
                 else:
                     x.tofile(snap_dir + hexdigest + "_x.bin")
 
-        assert (x is not None), 'Problems loading data. x is None!'
+        assert x is not None, "Problems loading data. x is None!"
 
         return x
-

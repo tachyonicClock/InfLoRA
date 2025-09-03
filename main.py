@@ -1,7 +1,8 @@
-import json
 import argparse
+import json
+
 from trainer import train
-import ipdb
+
 
 def main():
     args = setup_parser().parse_args()
@@ -19,15 +20,21 @@ def load_json(settings_path):
 
 
 def setup_parser():
-    parser = argparse.ArgumentParser(description='Reproduce of multiple continual learning algorthms.')
-    parser.add_argument('--config', type=str, default='./exps/finetune.json',
-                        help='Json file of settings.')
-    parser.add_argument('--device', type=str, default='0')
+    parser = argparse.ArgumentParser(
+        description="Reproduce of multiple continual learning algorthms."
+    )
+    parser.add_argument(
+        "--config",
+        type=str,
+        default="./exps/finetune.json",
+        help="Json file of settings.",
+    )
+    parser.add_argument("--device", type=str, default="0")
 
     # # optim
     # parser.add_argument('--optim', type=str, default='adam', choices=['adam', 'sgd'])
     return parser
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

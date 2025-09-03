@@ -43,7 +43,10 @@ class TextEncoder(nn.Module):
 
         # x.shape = [batch_size, n_ctx, transformer.width]
         # take features from the eot embedding (eot_token is the highest number in each sequence)
-        x = x[torch.arange(x.shape[0]), tokenized_prompts.argmax(dim=-1)] @ self.text_projection
+        x = (
+            x[torch.arange(x.shape[0]), tokenized_prompts.argmax(dim=-1)]
+            @ self.text_projection
+        )
 
         return x
 
@@ -53,7 +56,7 @@ class PromptLearner(nn.Module):
         super().__init__()
         n_cls = len(classnames)
 
-        n_ctx = cfg.NCTX # number of context vectors
+        n_ctx = cfg.NCTX  # number of context vectors
         ctx_init = cfg.CTXINIT
         dtype = clip_model.dtype
         ctx_dim = clip_model.ln_final.weight.shape[0]
@@ -68,7 +71,7 @@ class PromptLearner(nn.Module):
             prompt = clip.tokenize(ctx_init)
             with torch.no_grad():
                 embedding = clip_model.token_embedding(prompt).type(dtype)
-            ctx_vectors = embedding[0, 1: 1 + n_ctx, :]
+            ctx_vectors = embedding[0, 1 : 1 + n_ctx, :]
             prompt_prefix = ctx_init
 
         else:
@@ -98,7 +101,7 @@ class PromptLearner(nn.Module):
 
         # These token vectors will be saved when in save_model(), but they should be ignored in load_model() as we want to use those computed using the current class names
         self.register_buffer("token_prefix", embedding[:, :1, :])  # SOS
-        self.register_buffer("token_suffix", embedding[:, 1 + n_ctx:, :])  # CLS, EOS
+        self.register_buffer("token_suffix", embedding[:, 1 + n_ctx :, :])  # CLS, EOS
         # token_suffix = torch.zeros(embedding.shape[0],embedding.shape[1] - 1 - n_ctx, embedding.shape[2]).to(device)
         # nn.init.normal_(token_suffix, std=0.02)
         # # print(token_suffix.shape)
@@ -134,11 +137,11 @@ class PromptLearner(nn.Module):
             prompts = []
             for i in range(self.n_cls):
                 name_len = self.name_lens[i]
-                prefix_i = prefix[i: i + 1, :, :]
-                class_i = suffix[i: i + 1, :name_len, :]
-                suffix_i = suffix[i: i + 1, name_len:, :]
-                ctx_i_half1 = ctx[i: i + 1, :half_n_ctx, :]
-                ctx_i_half2 = ctx[i: i + 1, half_n_ctx:, :]
+                prefix_i = prefix[i : i + 1, :, :]
+                class_i = suffix[i : i + 1, :name_len, :]
+                suffix_i = suffix[i : i + 1, name_len:, :]
+                ctx_i_half1 = ctx[i : i + 1, :half_n_ctx, :]
+                ctx_i_half2 = ctx[i : i + 1, half_n_ctx:, :]
                 prompt = torch.cat(
                     [
                         prefix_i,  # (1, 1, dim)
@@ -156,10 +159,10 @@ class PromptLearner(nn.Module):
             prompts = []
             for i in range(self.n_cls):
                 name_len = self.name_lens[i]
-                prefix_i = prefix[i: i + 1, :, :]
-                class_i = suffix[i: i + 1, :name_len, :]
-                suffix_i = suffix[i: i + 1, name_len:, :]
-                ctx_i = ctx[i: i + 1, :, :]
+                prefix_i = prefix[i : i + 1, :, :]
+                class_i = suffix[i : i + 1, :name_len, :]
+                suffix_i = suffix[i : i + 1, name_len:, :]
+                ctx_i = ctx[i : i + 1, :, :]
                 prompt = torch.cat(
                     [
                         prefix_i,  # (1, 1, dim)
@@ -179,8 +182,8 @@ class PromptLearner(nn.Module):
 
 
 class cfgc(object):
-    backbonename = 'ViT-B/16'
+    backbonename = "ViT-B/16"
     NCTX = 16
-    CTXINIT = ''
+    CTXINIT = ""
     CSC = False
-    CLASS_TOKEN_POSITION = 'end'
+    CLASS_TOKEN_POSITION = "end"

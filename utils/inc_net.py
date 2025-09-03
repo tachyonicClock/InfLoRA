@@ -1,25 +1,29 @@
 import copy
 import logging
-import torch
-from torch import nn
-from convs.linears import SimpleLinear, SplitCosineLinear, CosineLinear
+
 import timm
+import torch
+from convs.linears import CosineLinear, SimpleLinear, SplitCosineLinear
+from torch import nn
 
 
 def get_convnet(args, pretrained=False):
+    name = "pretrained_vit_b16_224_in21k"
+    # SimpleCIL or SimpleCIL w/ Finetune
+    if name == "pretrained_vit_b16_224" or name == "vit_base_patch16_224":
+        model = timm.create_model(
+            "vit_base_patch16_224", pretrained=True, num_classes=0
+        )
+        model.out_dim = 768
+        return model.eval()
+    elif name == "pretrained_vit_b16_224_in21k" or name == "vit_base_patch16_224_in21k":
+        model = timm.create_model(
+            "vit_base_patch16_224_in21k", pretrained=True, num_classes=0
+        )
+        model.out_dim = 768
+        return model.eval()
 
-    name = 'pretrained_vit_b16_224_in21k'
-    #SimpleCIL or SimpleCIL w/ Finetune
-    if name=="pretrained_vit_b16_224" or name=="vit_base_patch16_224":
-        model=timm.create_model("vit_base_patch16_224",pretrained=True, num_classes=0)
-        model.out_dim=768
-        return model.eval()
-    elif name=="pretrained_vit_b16_224_in21k" or name=="vit_base_patch16_224_in21k":
-        model=timm.create_model("vit_base_patch16_224_in21k",pretrained=True, num_classes=0)
-        model.out_dim=768
-        return model.eval()
-    
-    # SSF 
+    # SSF
     # elif '_ssf' in name:
     #     if args["model_name"]=="adam_ssf":
     #         from convs import vision_transformer_ssf
@@ -32,16 +36,16 @@ def get_convnet(args, pretrained=False):
     #         return model.eval()
     #     else:
     #         raise NotImplementedError("Inconsistent model name and model type")
-    
+
     # # VPT
     # elif '_vpt' in name:
     #     if args["model_name"]=="adam_vpt":
     #         from convs.vpt import build_promptmodel
     #         if name=="pretrained_vit_b16_224_vpt":
-    #             basicmodelname="vit_base_patch16_224" 
+    #             basicmodelname="vit_base_patch16_224"
     #         elif name=="pretrained_vit_b16_224_in21k_vpt":
     #             basicmodelname="vit_base_patch16_224_in21k"
-            
+
     #         print("modelname,",name,"basicmodelname",basicmodelname)
     #         VPT_type="Deep"
     #         if args["vpt_type"]=='shallow':
@@ -93,28 +97,30 @@ def get_convnet(args, pretrained=False):
 
 
 def load_state_vision_model(model, ckpt_path):
-    ckpt_state = torch.load(ckpt_path, map_location='cpu')
-    if 'state_dict' in ckpt_state:
+    ckpt_state = torch.load(ckpt_path, map_location="cpu")
+    if "state_dict" in ckpt_state:
         # our upstream converted checkpoint
-        ckpt_state = ckpt_state['state_dict']
-        prefix = ''
-    elif 'model' in ckpt_state:
+        ckpt_state = ckpt_state["state_dict"]
+        prefix = ""
+    elif "model" in ckpt_state:
         # prototype checkpoint
-        ckpt_state = ckpt_state['model']
-        prefix = 'module.'
+        ckpt_state = ckpt_state["model"]
+        prefix = "module."
     else:
         # official checkpoint
-        prefix = ''
+        prefix = ""
 
-    logger = logging.getLogger('global')
+    logger = logging.getLogger("global")
     if ckpt_state:
-        logger.info('==> Loading model state "{}XXX" from pre-trained model..'.format(prefix))
-        
+        logger.info(
+            '==> Loading model state "{}XXX" from pre-trained model..'.format(prefix)
+        )
+
         own_state = model.state_dict()
         state = {}
         for name, param in ckpt_state.items():
             if name.startswith(prefix):
-                state[name[len(prefix):]] = param
+                state[name[len(prefix) :]] = param
         success_cnt = 0
         for name, param in state.items():
             if name in own_state:
@@ -125,35 +131,39 @@ def load_state_vision_model(model, ckpt_path):
                     if isinstance(param, bool):
                         own_state[name] = param
                     else:
-                        # normal version 
+                        # normal version
                         own_state[name].copy_(param)
                     success_cnt += 1
                 except Exception as err:
                     logger.warn(err)
-                    logger.warn('while copying the parameter named {}, '
-                                         'whose dimensions in the model are {} and '
-                                         'whose dimensions in the checkpoint are {}.'
-                                         .format(name, own_state[name].size(), param.size()))
+                    logger.warn(
+                        "while copying the parameter named {}, "
+                        "whose dimensions in the model are {} and "
+                        "whose dimensions in the checkpoint are {}.".format(
+                            name, own_state[name].size(), param.size()
+                        )
+                    )
                     logger.warn("But don't worry about it. Continue pretraining.")
         ckpt_keys = set(state.keys())
         own_keys = set(model.state_dict().keys())
         missing_keys = own_keys - ckpt_keys
-        logger.info('Successfully loaded {} key(s) from {}'.format(success_cnt, ckpt_path))
+        logger.info(
+            "Successfully loaded {} key(s) from {}".format(success_cnt, ckpt_path)
+        )
         for k in missing_keys:
-            logger.warn('Caution: missing key from checkpoint: {}'.format(k))
+            logger.warn("Caution: missing key from checkpoint: {}".format(k))
         redundancy_keys = ckpt_keys - own_keys
         for k in redundancy_keys:
-            logger.warn('Caution: redundant key from checkpoint: {}'.format(k))
+            logger.warn("Caution: redundant key from checkpoint: {}".format(k))
 
 
 class BaseNet(nn.Module):
     def __init__(self, args, pretrained):
         super(BaseNet, self).__init__()
 
-
-        print('This is for the BaseNet initialization.')
+        print("This is for the BaseNet initialization.")
         self.image_encoder = get_convnet(args, pretrained)
-        print('After BaseNet initialization.')
+        print("After BaseNet initialization.")
         self.fc = None
 
     @property
@@ -264,10 +274,10 @@ class IncrementalNet(BaseNet):
             forward_hook
         )
 
-class IL2ANet(IncrementalNet):
 
+class IL2ANet(IncrementalNet):
     def update_fc(self, num_old, num_total, num_aux):
-        fc = self.generate_fc(self.feature_dim, num_total+num_aux)
+        fc = self.generate_fc(self.feature_dim, num_total + num_aux)
         if self.fc is not None:
             weight = copy.deepcopy(self.fc.weight.data)
             bias = copy.deepcopy(self.fc.bias.data)
@@ -275,6 +285,7 @@ class IL2ANet(IncrementalNet):
             fc.bias.data[:num_old] = bias[:num_old]
         del self.fc
         self.fc = fc
+
 
 class CosineIncrementalNet(BaseNet):
     def __init__(self, args, pretrained, nb_proxy=1):
@@ -494,7 +505,14 @@ class SimpleCosineIncrementalNet(BaseNet):
             if nextperiod_initialization is not None:
                 weight = torch.cat([weight, nextperiod_initialization])
             else:
-                weight = torch.cat([weight, torch.zeros(nb_classes - nb_output, self.feature_dim).to(self._device)])
+                weight = torch.cat(
+                    [
+                        weight,
+                        torch.zeros(nb_classes - nb_output, self.feature_dim).to(
+                            self._device
+                        ),
+                    ]
+                )
             fc.weight = nn.Parameter(weight)
         del self.fc
         self.fc = fc
@@ -518,7 +536,14 @@ class SimpleVitNet(BaseNet):
             if nextperiod_initialization is not None:
                 weight = torch.cat([weight, nextperiod_initialization])
             else:
-                weight = torch.cat([weight, torch.zeros(nb_classes - nb_output, self.feature_dim).to(self._device)])
+                weight = torch.cat(
+                    [
+                        weight,
+                        torch.zeros(nb_classes - nb_output, self.feature_dim).to(
+                            self._device
+                        ),
+                    ]
+                )
             fc.weight = nn.Parameter(weight)
         del self.fc
         self.fc = fc
@@ -541,21 +566,23 @@ class MultiBranchCosineIncrementalNet(BaseNet):
     def __init__(self, args, pretrained):
         super().__init__(args, pretrained)
         self._device = args["device"][0]
-        
+
         # no need the convnet.
-        
-        print('Clear the convnet in MultiBranchCosineIncrementalNet, since we are using self.convnets with dual branches')
-        self.convnet=torch.nn.Identity()
+
+        print(
+            "Clear the convnet in MultiBranchCosineIncrementalNet, since we are using self.convnets with dual branches"
+        )
+        self.convnet = torch.nn.Identity()
         for param in self.convnet.parameters():
             param.requires_grad = False
 
         self.convnets = nn.ModuleList()
-        self.args=args
-        
-        if 'resnet' in args['convnet_type']:
-            self.modeltype='cnn'
+        self.args = args
+
+        if "resnet" in args["convnet_type"]:
+            self.modeltype = "cnn"
         else:
-            self.modeltype='vit'
+            self.modeltype = "vit"
 
     def update_fc(self, nb_classes, nextperiod_initialization=None):
         fc = self.generate_fc(self._feature_dim, nb_classes).to(self._device)
@@ -566,7 +593,14 @@ class MultiBranchCosineIncrementalNet(BaseNet):
             if nextperiod_initialization is not None:
                 weight = torch.cat([weight, nextperiod_initialization])
             else:
-                weight = torch.cat([weight, torch.zeros(nb_classes - nb_output, self._feature_dim).to(self._device)])
+                weight = torch.cat(
+                    [
+                        weight,
+                        torch.zeros(nb_classes - nb_output, self._feature_dim).to(
+                            self._device
+                        ),
+                    ]
+                )
             fc.weight = nn.Parameter(weight)
         del self.fc
         self.fc = fc
@@ -574,10 +608,9 @@ class MultiBranchCosineIncrementalNet(BaseNet):
     def generate_fc(self, in_dim, out_dim):
         fc = CosineLinear(in_dim, out_dim)
         return fc
-    
 
     def forward(self, x):
-        if self.modeltype=='cnn':
+        if self.modeltype == "cnn":
             features = [convnet(x)["features"] for convnet in self.convnets]
             features = torch.cat(features, 1)
             # import pdb; pdb.set_trace()
@@ -592,33 +625,32 @@ class MultiBranchCosineIncrementalNet(BaseNet):
             out.update({"features": features})
             return out
 
-    
     def construct_dual_branch_network(self, tuned_model):
-        if 'ssf' in self.args['convnet_type']:
-            newargs=copy.deepcopy(self.args)
-            newargs['convnet_type']=newargs['convnet_type'].replace('_ssf','')
-            print(newargs['convnet_type'])
-            self.convnets.append(get_convnet(newargs)) #pretrained model without scale
-        elif 'vpt' in self.args['convnet_type']:
-            newargs=copy.deepcopy(self.args)
-            newargs['convnet_type']=newargs['convnet_type'].replace('_vpt','')
-            print(newargs['convnet_type'])
-            self.convnets.append(get_convnet(newargs)) #pretrained model without vpt
-        elif 'adapter' in self.args['convnet_type']:
-            newargs=copy.deepcopy(self.args)
-            newargs['convnet_type']=newargs['convnet_type'].replace('_adapter','')
-            print(newargs['convnet_type'])
-            self.convnets.append(get_convnet(newargs)) #pretrained model without adapter
+        if "ssf" in self.args["convnet_type"]:
+            newargs = copy.deepcopy(self.args)
+            newargs["convnet_type"] = newargs["convnet_type"].replace("_ssf", "")
+            print(newargs["convnet_type"])
+            self.convnets.append(get_convnet(newargs))  # pretrained model without scale
+        elif "vpt" in self.args["convnet_type"]:
+            newargs = copy.deepcopy(self.args)
+            newargs["convnet_type"] = newargs["convnet_type"].replace("_vpt", "")
+            print(newargs["convnet_type"])
+            self.convnets.append(get_convnet(newargs))  # pretrained model without vpt
+        elif "adapter" in self.args["convnet_type"]:
+            newargs = copy.deepcopy(self.args)
+            newargs["convnet_type"] = newargs["convnet_type"].replace("_adapter", "")
+            print(newargs["convnet_type"])
+            self.convnets.append(
+                get_convnet(newargs)
+            )  # pretrained model without adapter
         else:
-            self.convnets.append(get_convnet(self.args)) #the pretrained model itself
+            self.convnets.append(get_convnet(self.args))  # the pretrained model itself
 
-        self.convnets.append(tuned_model.convnet) #adappted tuned model
-    
-        self._feature_dim = self.convnets[0].out_dim * len(self.convnets) 
-        self.fc=self.generate_fc(self._feature_dim,self.args['init_cls'])
-        
+        self.convnets.append(tuned_model.convnet)  # adappted tuned model
 
-    
+        self._feature_dim = self.convnets[0].out_dim * len(self.convnets)
+        self.fc = self.generate_fc(self._feature_dim, self.args["init_cls"])
+
 
 class FOSTERNet(nn.Module):
     def __init__(self, args, pretrained):
