@@ -35,10 +35,8 @@ lame: 1
 # Optimizer
 optim: adam
 init_lr: 0.0005
-init_lr_decay: 0.1
 init_weight_decay: 0
 lrate: 0.0005
-lrate_decay: 0.1
 weight_decay: 0
 
 # Other settings

@@ -37,11 +37,11 @@ class InfLoRA(BaseLearner):
         self.EPSILON = args["EPSILON"]
         self.init_epoch = args["init_epoch"]
         self.init_lr = args["init_lr"]
-        self.init_lr_decay = args["init_lr_decay"]
+        assert "init_lr_decay" not in args
         self.init_weight_decay = args["init_weight_decay"]
         self.epochs = args["epochs"]
         self.lrate = args["lrate"]
-        self.lrate_decay = args["lrate_decay"]
+        assert "lrate_decay" not in args
         self.batch_size = args["batch_size"]
         self.weight_decay = args["weight_decay"]
         self.num_workers = args["num_workers"]
