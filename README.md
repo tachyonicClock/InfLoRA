@@ -1,4 +1,8 @@
 # InfLoRA: Interference-Free Low-Rank Adaptation for Continual Learning
+```
+ts -G 1 -m -L inflora python main.py --device 0 --config configs/cifar100_inflora.json 
+```
+
 
 <div align="justify">
   This is the official implementation of our CVPR 2024 paper "Interference-Free Low-Rank Adaptation for Continual Learning".

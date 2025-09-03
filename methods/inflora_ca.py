@@ -81,39 +81,11 @@ class InfLoRA_CA(BaseLearner):
             "Learning on {}-{}".format(self._known_classes, self._total_classes)
         )
 
-        train_dataset = data_manager.get_dataset(
-            np.arange(self._known_classes, self._total_classes),
-            source="train",
-            mode="train",
-        )
-        self.train_loader = DataLoader(
-            train_dataset,
-            batch_size=self.batch_size,
-            shuffle=True,
-            num_workers=self.num_workers,
-        )
-        test_dataset = data_manager.get_dataset(
-            np.arange(0, self._total_classes), source="test", mode="test"
-        )
-        self.test_loader = DataLoader(
-            test_dataset,
-            batch_size=self.batch_size,
-            shuffle=False,
-            num_workers=self.num_workers,
-        )
-
-        # if len(self._multiple_gpus) > 1:
-        #     self._network = nn.DataParallel(self._network, self._multiple_gpus)
+        train_dataset = data_manager.get_dataset(np.arange(self._known_classes, self._total_classes), source='train', mode='train')
+        self.train_loader = DataLoader(train_dataset, batch_size=self.batch_size, shuffle=True,
+                                       num_workers=self.num_workers, pin_memory=True)
         self._train(self.train_loader, self.test_loader)
-        self.clustering(self.train_loader)
-        # if len(self._multiple_gpus) > 1:
-        #     self._network = self._network.module
-
-        # CA
-        # self._network.classifier_backup(self._cur_task)
-        # if self.save_before_ca:
-        #     self.save_checkpoint(self.log_path+'/'+self.model_prefix+'_seed{}_before_ca'.format(self.seed), head_only=self.fix_bcb)
-
+        self.clustering(self.train_loader)        
         self._compute_class_mean(data_manager, check_diff=False, oracle=False)
         if self._cur_task > 0:
             self._stage2_compact_classifier(self.task_sizes[-1])
@@ -343,27 +315,23 @@ class InfLoRA_CA(BaseLearner):
             torch.tensor(clustering.cluster_centers_).to(feature.device)
         )
 
-    def eval_task(self):
-        y_pred, y_pred_with_task, y_true, y_pred_task, y_true_task = self._eval_cnn(
-            self.test_loader
-        )
-        y_pred1, y_pred_with_task1, y_true1, y_pred_task1, y_true_task1 = (
-            self._eval_cnn1(self.test_loader)
-        )
-        cnn_accy = self._evaluate(y_pred, y_true)
-        cnn_accy1 = self._evaluate(y_pred1, y_true1)
-        cnn_accy_with_task = self._evaluate(y_pred_with_task, y_true)
-        cnn_accy_with_task1 = self._evaluate(y_pred_with_task1, y_true1)
-        cnn_accy_task = (y_pred_task == y_true_task).sum().item() / len(y_pred_task)
-        cnn_accy_task1 = (y_pred_task1 == y_true_task1).sum().item() / len(y_pred_task1)
+    # def eval_task(self):
+    #     y_pred, y_pred_with_task, y_true, y_pred_task, y_true_task = self._eval_cnn(self.test_loader)
+    #     y_pred1, y_pred_with_task1, y_true1, y_pred_task1, y_true_task1 = self._eval_cnn1(self.test_loader)
+    #     cnn_accy = self._evaluate(y_pred, y_true)
+    #     cnn_accy1 = self._evaluate(y_pred1, y_true1)
+    #     cnn_accy_with_task = self._evaluate(y_pred_with_task, y_true)
+    #     cnn_accy_with_task1 = self._evaluate(y_pred_with_task1, y_true1)
+    #     cnn_accy_task = (y_pred_task == y_true_task).sum().item()/len(y_pred_task)
+    #     cnn_accy_task1 = (y_pred_task1 == y_true_task1).sum().item()/len(y_pred_task1)
 
-        if hasattr(self, "_class_means"):
-            y_pred, y_true = self._eval_nme(self.test_loader, self._class_means)
-            nme_accy = self._evaluate(y_pred, y_true)
-        else:
-            nme_accy = None
+    #     if hasattr(self, '_class_means'):
+    #         y_pred, y_true = self._eval_nme(self.test_loader, self._class_means)
+    #         nme_accy = self._evaluate(y_pred, y_true)
+    #     else:
+    #         nme_accy = None
 
-        return cnn_accy, cnn_accy_with_task, nme_accy, cnn_accy_task
+    #     return cnn_accy, cnn_accy_with_task, nme_accy, cnn_accy_task
 
     def _evaluate(self, y_pred, y_true):
         ret = {}

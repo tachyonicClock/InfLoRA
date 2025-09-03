@@ -24,11 +24,14 @@ class BaseLearner(object):
         self._data_memory, self._targets_memory = np.array([]), np.array([])
         self.topk = 5
 
-        self._memory_size = args["memory_size"]
-        self._memory_per_class = args["memory_per_class"]
-        self._fixed_memory = args["fixed_memory"]
-        self._device = args["device"][0]
-        self._multiple_gpus = args["device"]
+        self._memory_size = args['memory_size']
+        self._memory_per_class = args['memory_per_class']
+        self._fixed_memory = args['fixed_memory']
+        self._device = args['device'][0]
+        self._multiple_gpus = args['device']
+
+        #: The number of classes we will ever see
+        self._max_classes = None
 
     @property
     def exemplar_size(self):
@@ -70,31 +73,30 @@ class BaseLearner(object):
     def after_task(self):
         pass
 
-    def _evaluate(self, y_pred, y_true):
-        ret = {}
-        grouped = accuracy(y_pred.T[0], y_true, self._known_classes)
-        ret["grouped"] = grouped
-        ret["top1"] = grouped["total"]
-        ret["top{}".format(self.topk)] = np.around(
-            (y_pred.T == np.tile(y_true, (self.topk, 1))).sum() * 100 / len(y_true),
-            decimals=2,
-        )
+    def predict(self, x: torch.Tensor) -> torch.Tensor:
+        y_hat = self._network.interface(x)
+        # pad with zeros if < self._max_classes
+        if y_hat.shape[1] < self._max_classes:
+            padding = torch.zeros(y_hat.shape[0], self._max_classes - y_hat.shape[1]).to(self._device)
+            y_hat = torch.cat((y_hat, padding), dim=1)
+        return y_hat
 
-        return ret
+    @torch.no_grad()
+    def eval_task(self, train_task_idx: int, test_task_idx: int, loader: DataLoader, evaluator):
+        self._network.eval()
+        self._network.to(self._device)
 
-    def eval_task(self):
-        results = self._eval_cnn(self.test_loader)
-        cnn_accy = self._evaluate(results["y_pred"], results["y_true"])
-        cnn_accy_with_task = self._evaluate(results["y_pred_with_task"], results["y_true"])
-        cnn_accy_task = (results["y_pred_task"] == results["y_true_task"]).sum().item()/len(results["y_pred_task"])
+        for _, (_, x, y) in enumerate(loader):
+            x = x.to(self._device)
+            y = y.to(self._device)
+            y_hat = self.predict(x)
+            # pad with zeros
+            if y_hat.shape[1] < self._total_classes:
+                padding = torch.zeros(y_hat.shape[0], self._total_classes - y_hat.shape[1]).to(self._device)
+                y_hat = torch.cat((y_hat, padding), dim=1)
 
-        if hasattr(self, "_class_means"):
-            y_pred, y_true = self._eval_nme(self.test_loader, self._class_means)
-            nme_accy = self._evaluate(y_pred, y_true)
-        else:
-            nme_accy = None
+            evaluator.update(train_task_idx, test_task_idx, y_hat, y)
 
-        return cnn_accy, cnn_accy_with_task, nme_accy, cnn_accy_task, results["ece"]
 
     def incremental_train(self):
         pass

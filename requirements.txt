@@ -7,3 +7,7 @@ numpy
 scikit-learn
 pyyaml
 torchmetrics
+ipykernel
+pandas
+matplotlib
+seaborn
