@@ -1,6 +1,6 @@
 # Training
-# epochs: 20      # full experiment
-# init_epoch: 20  # full experiment
+# epochs: 5      # full experiment
+# init_epoch: 5  # full experiment
 # seed: [0,1,2,3,4] # full experiment
 epochs: 1     # short test
 init_epoch: 1 # short test
@@ -16,10 +16,10 @@ memory_size: 0
 # Scenario:
 total_sessions: 10
 shuffle: false
-init_cls: 10
-increment: 10
-dataset: cifar100
-data_path: data/
+init_cls: 20
+increment: 20
+dataset: ImageNet_R
+data_path: data/imagenet-r
 
 # Model
 embd_dim: 768
@@ -27,15 +27,16 @@ net_type: sip
 num_heads: 12
 
 # Method
-model_name: InfLoRA
-rank: 10   # set based on supplementary of (Liang & Li, 2024)
-lamb: 0.95 # set based on supplementary of (Liang & Li, 2024)
-lame: 1
+model_name: sprompts_coda
+prompt_param:
+- 100 # e_pool_size (Liang & Li, 2024) denotes as $p$
+- 8   # e_p_length (Liang & Li, 2024) denotes as $e$
+- 0   # ortho_mu
 
 # Optimizer
 optim: adam
-init_lr: 0.0005 # set based on supplementary of Liang & Li (2024)
-lrate: 0.0005   # set based on supplementary of Liang & Li (2024)
+init_lr: 0.001 # set based on supplementary of Liang & Li (2024)
+lrate: 0.001   # set based on supplementary of Liang & Li (2024)
 init_weight_decay: 0
 weight_decay: 0
 
