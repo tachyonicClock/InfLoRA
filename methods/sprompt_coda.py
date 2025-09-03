@@ -198,10 +198,11 @@ class SPrompts_coda(BaseLearner):
         y_hat = self._network.interface(x, feature)
         # pad with zeros if < self._max_classes
         if y_hat.shape[1] < self._max_classes:
-            padding = torch.zeros(y_hat.shape[0], self._max_classes - y_hat.shape[1]).to(self._device)
+            padding = torch.zeros(
+                y_hat.shape[0], self._max_classes - y_hat.shape[1]
+            ).to(self._device)
             y_hat = torch.cat((y_hat, padding), dim=1)
         return y_hat
-
 
     def _eval_cnn(self, loader):
         self._network.eval()

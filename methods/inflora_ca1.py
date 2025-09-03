@@ -38,7 +38,7 @@ class InfLoRA_CA1(BaseLearner):
         self.init_epoch = args["init_epoch"]
         self.epochs = args["epochs"]
         self.lrate = args["lrate"]
-        #self.lrate_decay = args["lrate_decay"]
+        # self.lrate_decay = args["lrate_decay"]
         self.batch_size = args["batch_size"]
         self.weight_decay = args["weight_decay"]
         self.num_workers = args["num_workers"]
@@ -216,16 +216,29 @@ class InfLoRA_CA1(BaseLearner):
         if len(self._multiple_gpus) > 1:
             self._network = nn.DataParallel(self._network, self._multiple_gpus)
         base_params = self._network.module.image_encoder.parameters()
-        base_fc_params = [p for p in self._network.module.classifier_pool.parameters() if p.requires_grad==True]
-        base_params = {'params': base_params, 'lr': self.lrate, 'weight_decay': self.weight_decay}
+        base_fc_params = [
+            p
+            for p in self._network.module.classifier_pool.parameters()
+            if p.requires_grad == True
+        ]
+        base_params = {
+            "params": base_params,
+            "lr": self.lrate,
+            "weight_decay": self.weight_decay,
+        }
         # base_fc_params = {'params': base_fc_params, 'lr': self.fc_lrate, 'weight_decay': self.weight_decay}
         # network_params = [base_params, base_fc_params]
 
-        if self.optim == 'sgd':
+        if self.optim == "sgd":
             assert False
-        elif self.optim == 'adam':
-            optimizer = optim.Adam(self._network.parameters(),lr=self.lrate,weight_decay=self.weight_decay, betas=(0.9,0.999))
-            scheduler = CosineSchedule(optimizer=optimizer,K=self.epochs)
+        elif self.optim == "adam":
+            optimizer = optim.Adam(
+                self._network.parameters(),
+                lr=self.lrate,
+                weight_decay=self.weight_decay,
+                betas=(0.9, 0.999),
+            )
+            scheduler = CosineSchedule(optimizer=optimizer, K=self.epochs)
         else:
             raise NotImplementedError
 

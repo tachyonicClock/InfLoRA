@@ -19,6 +19,7 @@ import ipdb
 import math
 from torchmetrics.classification import MulticlassCalibrationError
 
+
 class InfLoRA(BaseLearner):
     def __init__(self, args):
         super().__init__(args)
@@ -74,13 +75,27 @@ class InfLoRA(BaseLearner):
             "Learning on {}-{}".format(self._known_classes, self._total_classes)
         )
 
-        train_dataset = data_manager.get_dataset(np.arange(self._known_classes, self._total_classes), source='train', mode='train')
-        logging.info('Dataset size: {}'.format(len(train_dataset)))
-        self.train_loader = DataLoader(train_dataset, batch_size=self.batch_size, shuffle=True,
-                                       num_workers=self.num_workers)
-        test_dataset = data_manager.get_dataset(np.arange(0, self._total_classes), source='test', mode='test')
-        self.test_loader = DataLoader(test_dataset, batch_size=self.batch_size, shuffle=False,
-                                      num_workers=self.num_workers)
+        train_dataset = data_manager.get_dataset(
+            np.arange(self._known_classes, self._total_classes),
+            source="train",
+            mode="train",
+        )
+        logging.info("Dataset size: {}".format(len(train_dataset)))
+        self.train_loader = DataLoader(
+            train_dataset,
+            batch_size=self.batch_size,
+            shuffle=True,
+            num_workers=self.num_workers,
+        )
+        test_dataset = data_manager.get_dataset(
+            np.arange(0, self._total_classes), source="test", mode="test"
+        )
+        self.test_loader = DataLoader(
+            test_dataset,
+            batch_size=self.batch_size,
+            shuffle=False,
+            num_workers=self.num_workers,
+        )
 
         # if len(self._multiple_gpus) > 1:
         #     self._network = nn.DataParallel(self._network, self._multiple_gpus)
@@ -242,8 +257,8 @@ class InfLoRA(BaseLearner):
             # Projection Matrix Precomputation
             self.feature_mat = []
             for p in range(len(self.feature_list)):
-                Uf=torch.Tensor(np.dot(self.feature_list[p],self.feature_list[p].T))
-                print('Layer {} - Projection Matrix shape: {}'.format(p+1,Uf.shape))
+                Uf = torch.Tensor(np.dot(self.feature_list[p], self.feature_list[p].T))
+                print("Layer {} - Projection Matrix shape: {}".format(p + 1, Uf.shape))
                 self.feature_mat.append(Uf)
 
         return
@@ -364,8 +379,8 @@ class InfLoRA(BaseLearner):
             "y_true": np.concatenate(y_true),
             "y_pred_task": torch.cat(y_pred_task),
             "y_true_task": torch.cat(y_true_task),
-            "ece": ece.compute().item()
-        }  
+            "ece": ece.compute().item(),
+        }
 
     def _compute_accuracy_domain(self, model, loader):
         model.eval()
@@ -410,8 +425,10 @@ class InfLoRA(BaseLearner):
                     U1, S1, Vh1 = np.linalg.svd(activation, full_matrices=False)
                     sval_total = (S1**2).sum()
                     # Projected Representation (Eq-8)
-                    act_hat = activation - np.dot(np.dot(self.feature_list[i],self.feature_list[i].T),activation)
-                    U,S,Vh = np.linalg.svd(act_hat, full_matrices=False)
+                    act_hat = activation - np.dot(
+                        np.dot(self.feature_list[i], self.feature_list[i].T), activation
+                    )
+                    U, S, Vh = np.linalg.svd(act_hat, full_matrices=False)
                     # criteria (Eq-9)
                     sval_hat = (S**2).sum()
                     sval_ratio = (S**2) / sval_total
@@ -439,8 +456,10 @@ class InfLoRA(BaseLearner):
                     U1, S1, Vh1 = np.linalg.svd(activation, full_matrices=False)
                     sval_total = (S1**2).sum()
                     # Projected Representation (Eq-8)
-                    act_hat = np.dot(np.dot(self.feature_list[i],self.feature_list[i].T),activation)
-                    U,S,Vh = np.linalg.svd(act_hat, full_matrices=False)
+                    act_hat = np.dot(
+                        np.dot(self.feature_list[i], self.feature_list[i].T), activation
+                    )
+                    U, S, Vh = np.linalg.svd(act_hat, full_matrices=False)
                     # criteria (Eq-9)
                     sval_hat = (S**2).sum()
                     sval_ratio = (S**2) / sval_total
@@ -458,7 +477,9 @@ class InfLoRA(BaseLearner):
                         continue
 
                     # update GPM by Projected Representation (Eq-8)
-                    act_feature = self.feature_list[i] - np.dot(np.dot(U[:,0:r],U[:,0:r].T),self.feature_list[i])
+                    act_feature = self.feature_list[i] - np.dot(
+                        np.dot(U[:, 0:r], U[:, 0:r].T), self.feature_list[i]
+                    )
                     Ui, Si, Vi = np.linalg.svd(act_feature)
                     self.feature_list[i] = Ui[:, : self.feature_list[i].shape[1] - r]
 
@@ -510,8 +531,10 @@ class InfLoRA(BaseLearner):
                 U1, S1, Vh1 = np.linalg.svd(activation, full_matrices=False)
                 sval_total = (S1**2).sum()
                 # Projected Representation (Eq-8)
-                act_hat = activation - np.dot(np.dot(self.feature_list[i],self.feature_list[i].T),activation)
-                U,S,Vh = np.linalg.svd(act_hat, full_matrices=False)
+                act_hat = activation - np.dot(
+                    np.dot(self.feature_list[i], self.feature_list[i].T), activation
+                )
+                U, S, Vh = np.linalg.svd(act_hat, full_matrices=False)
                 # criteria (Eq-9)
                 sval_hat = (S**2).sum()
                 sval_ratio = (S**2) / sval_total

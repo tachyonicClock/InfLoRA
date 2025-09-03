@@ -24,11 +24,11 @@ class BaseLearner(object):
         self._data_memory, self._targets_memory = np.array([]), np.array([])
         self.topk = 5
 
-        self._memory_size = args['memory_size']
-        self._memory_per_class = args['memory_per_class']
-        self._fixed_memory = args['fixed_memory']
-        self._device = args['device'][0]
-        self._multiple_gpus = args['device']
+        self._memory_size = args["memory_size"]
+        self._memory_per_class = args["memory_per_class"]
+        self._fixed_memory = args["fixed_memory"]
+        self._device = args["device"][0]
+        self._multiple_gpus = args["device"]
 
         #: The number of classes we will ever see
         self._max_classes = None
@@ -77,12 +77,16 @@ class BaseLearner(object):
         y_hat = self._network.interface(x)
         # pad with zeros if < self._max_classes
         if y_hat.shape[1] < self._max_classes:
-            padding = torch.zeros(y_hat.shape[0], self._max_classes - y_hat.shape[1]).to(self._device)
+            padding = torch.zeros(
+                y_hat.shape[0], self._max_classes - y_hat.shape[1]
+            ).to(self._device)
             y_hat = torch.cat((y_hat, padding), dim=1)
         return y_hat
 
     @torch.no_grad()
-    def eval_task(self, train_task_idx: int, test_task_idx: int, loader: DataLoader, evaluator):
+    def eval_task(
+        self, train_task_idx: int, test_task_idx: int, loader: DataLoader, evaluator
+    ):
         self._network.eval()
         self._network.to(self._device)
 
@@ -92,11 +96,12 @@ class BaseLearner(object):
             y_hat = self.predict(x)
             # pad with zeros
             if y_hat.shape[1] < self._total_classes:
-                padding = torch.zeros(y_hat.shape[0], self._total_classes - y_hat.shape[1]).to(self._device)
+                padding = torch.zeros(
+                    y_hat.shape[0], self._total_classes - y_hat.shape[1]
+                ).to(self._device)
                 y_hat = torch.cat((y_hat, padding), dim=1)
 
             evaluator.update(train_task_idx, test_task_idx, y_hat, y)
-
 
     def incremental_train(self):
         pass

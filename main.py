@@ -5,6 +5,7 @@ from trainer import train
 import ipdb
 import yaml
 
+
 def main():
     args = setup_parser().parse_args()
     param = load_json(args.config)
@@ -14,10 +15,10 @@ def main():
 
 
 def load_json(settings_path):
-    if settings_path.endswith('.yaml') or settings_path.endswith('.yml'):
-        with open(settings_path, 'r') as f:
+    if settings_path.endswith(".yaml") or settings_path.endswith(".yml"):
+        with open(settings_path, "r") as f:
             param = yaml.safe_load(f)
-    elif settings_path.endswith('.json'):
+    elif settings_path.endswith(".json"):
         with open(settings_path) as data_file:
             param = json.load(data_file)
     return param

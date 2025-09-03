@@ -193,8 +193,12 @@ class ContinualLearningEvaluator:
         batch = y.shape[0]
         assert y_logit.shape == (batch, self._class_count)
         assert y.shape == (batch,)
-        assert train_task_idx < self._task_count, f"train_task_idx {train_task_idx} >= {self._task_count}"
-        assert test_task_idx < self._task_count, f"test_task_idx {test_task_idx} >= {self._task_count}"
+        assert (
+            train_task_idx < self._task_count
+        ), f"train_task_idx {train_task_idx} >= {self._task_count}"
+        assert (
+            test_task_idx < self._task_count
+        ), f"test_task_idx {test_task_idx} >= {self._task_count}"
         y_logit = y_logit.cpu()
         y = y.cpu()
 
