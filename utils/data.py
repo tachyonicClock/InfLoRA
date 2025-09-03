@@ -315,14 +315,8 @@ class iDomainNet(iData):
         self.args = args
         class_order = np.arange(345).tolist()
         self.class_order = class_order
-        self.domain_names = [
-            "clipart",
-            "infograph",
-            "painting",
-            "quickdraw",
-            "real",
-            "sketch",
-        ]
+        self.domain_names = ["clipart", "infograph", "painting", "quickdraw", "real", "sketch", ]
+        self.data_path = args['data_path']
 
     def download_data(self):
         # load splits from config file
@@ -337,6 +331,9 @@ class iDomainNet(iData):
         self.test_data = np.array(test_data_config["data"])
         self.test_targets = np.array(test_data_config["targets"])
 
+        # add data path
+        self.train_data = np.array([os.path.join(self.data_path, p) for p in self.train_data])
+        self.test_data = np.array([os.path.join(self.data_path, p) for p in self.test_data])
 
 def jpg_image_to_array(image_path):
     """
