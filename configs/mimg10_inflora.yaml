@@ -1,6 +1,6 @@
 # Training
-# epochs: 50      # full experiment
-# init_epoch: 50  # full experiment
+# epochs: 5      # full experiment
+# init_epoch: 5  # full experiment
 # seed: [0,1,2,3,4] # full experiment
 epochs: 1     # short test
 init_epoch: 1 # short test
@@ -14,12 +14,12 @@ memory_per_class: 0
 memory_size: 0
 
 # Scenario:
-total_sessions: 5
+total_sessions: 10
 shuffle: false
-init_cls: 69
-increment: 69
-dataset: domainnet
-data_path: data/domainnet
+init_cls: 20
+increment: 20
+dataset: ImageNet_R
+data_path: data/imagenet-r
 
 # Model
 embd_dim: 768
@@ -27,9 +27,9 @@ net_type: sip
 num_heads: 12
 
 # Method
-model_name: InfLoRA_domain
+model_name: InfLoRA
 rank: 10   # set based on supplementary of (Liang & Li, 2024)
-lamb: 0.95 # set based on supplementary of (Liang & Li, 2024)
+lamb: 0.98 # set based on supplementary of (Liang & Li, 2024)
 lame: 1
 
 # Optimizer

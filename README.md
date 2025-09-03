@@ -1,6 +1,8 @@
 # InfLoRA: Interference-Free Low-Rank Adaptation for Continual Learning
 ```
-ts -G 1 -m -L inflora python main.py --device 0 --config configs/cifar100_inflora.json 
+ts -G 1 -m -L CIFAR100_inflora python main.py --device 0 --config configs/cifar100_inflora.yaml 
+ts -G 1 -m -L CIFAR100_inflora python main.py --device 0 --config configs/domainnet_inflora.yaml
+ts -G 1 -m -L CIFAR100_inflora python main.py --device 0 --config configs/mimg10_inflora.yaml 
 ```
 
 
