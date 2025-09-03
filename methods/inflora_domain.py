@@ -210,7 +210,7 @@ class InfLoRA_domain(BaseLearner):
         base_fc_params = {
             "params": base_fc_params,
             "lr": self.fc_lrate,
-            "weight_decay": self.weight_decay,
+            # "weight_decay": self.weight_decay,
         }
         network_params = [base_params, base_fc_params]
 

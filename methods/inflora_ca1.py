@@ -46,7 +46,7 @@ class InfLoRA_CA1(BaseLearner):
         self.lame = args["lame"]
         self.total_sessions = args["total_sessions"]
         self.dataset = args["dataset"]
-        self.fc_lrate = args["fc_lrate"]
+        # self.fc_lrate = args["fc_lrate"]
         self.logit_norm = 0.1
         # self.logit_norm = None
 
@@ -216,26 +216,13 @@ class InfLoRA_CA1(BaseLearner):
         if len(self._multiple_gpus) > 1:
             self._network = nn.DataParallel(self._network, self._multiple_gpus)
         base_params = self._network.module.image_encoder.parameters()
-        base_fc_params = [
-            p
-            for p in self._network.module.classifier_pool.parameters()
-            if p.requires_grad == True
-        ]
-        base_params = {
-            "params": base_params,
-            "lr": self.lrate,
-            "weight_decay": self.weight_decay,
-        }
-        base_fc_params = {
-            "params": base_fc_params,
-            "lr": self.fc_lrate,
-            "weight_decay": self.weight_decay,
-        }
-        network_params = [base_params, base_fc_params]
+        base_fc_params = [p for p in self._network.module.classifier_pool.parameters() if p.requires_grad==True]
+        base_params = {'params': base_params, 'lr': self.lrate, 'weight_decay': self.weight_decay}
+        # base_fc_params = {'params': base_fc_params, 'lr': self.fc_lrate, 'weight_decay': self.weight_decay}
+        # network_params = [base_params, base_fc_params]
 
         if self.optim == 'sgd':
-            optimizer = optim.SGD(network_params, lr=self.lrate, momentum=0.9, weight_decay=self.weight_decay)
-            scheduler = optim.lr_scheduler.MultiStepLR(optimizer=optimizer, milestones=[18], gamma=#self.lrate_decay)
+            assert False
         elif self.optim == 'adam':
             optimizer = optim.Adam(self._network.parameters(),lr=self.lrate,weight_decay=self.weight_decay, betas=(0.9,0.999))
             scheduler = CosineSchedule(optimizer=optimizer,K=self.epochs)
