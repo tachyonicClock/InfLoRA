@@ -1,9 +1,9 @@
 import argparse
 import json
 
-from trainer import train
-import ipdb
 import yaml
+
+from trainer import train
 
 
 def main():

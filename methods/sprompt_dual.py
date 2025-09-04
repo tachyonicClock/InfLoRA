@@ -27,7 +27,7 @@ class SPrompts_dual(BaseLearner):
         self.EPSILON = args["EPSILON"]
         self.init_epoch = args["init_epoch"]
         self.init_lr = args["init_lr"]
-        self.init_lr_decay = args["init_lr_decay"]
+        # self.init_lr_decay = args["init_lr_decay"]
         self.init_weight_decay = args["init_weight_decay"]
         self.epochs = args["epochs"]
         self.lrate = args["lrate"]
@@ -185,6 +185,17 @@ class SPrompts_dual(BaseLearner):
             prog_bar.set_description(info)
 
         logging.info(info)
+
+    def predict(self, x: torch.Tensor) -> torch.Tensor:
+        feature = self._network.extract_vector(x)
+        y_hat = self._network.interface(x, feature)
+        # pad with zeros if < self._max_classes
+        if y_hat.shape[1] < self._max_classes:
+            padding = torch.zeros(
+                y_hat.shape[0], self._max_classes - y_hat.shape[1]
+            ).to(self._device)
+            y_hat = torch.cat((y_hat, padding), dim=1)
+        return y_hat
 
     def _evaluate(self, y_pred, y_true):
         ret = {}

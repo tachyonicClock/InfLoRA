@@ -1,12 +1,12 @@
 # Training
-# epochs: 50      # full experiment
-# init_epoch: 50  # full experiment
+# epochs: 5     # full experiment
+# init_epoch: 5 # full experiment
 # seed: [0,1,2,3,4] # full experiment
 epochs: 1     # short test
 init_epoch: 1 # short test
 seed: [0]     # short test
 batch_size: 128
-num_workers: 16
+num_workers: 4
 
 # No Replay:
 fixed_memory: true

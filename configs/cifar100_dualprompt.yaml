@@ -27,16 +27,16 @@ net_type: sip
 num_heads: 12
 
 # Method
-model_name: sprompts_coda
+model_name: sprompts_dual
 prompt_param:
-- 100 # e_pool_size (Liang & Li, 2024) denotes as $p$
-- 8   # e_p_length (Liang & Li, 2024) denotes as $e$
-- 0   # ortho_mu
+- 10   # e-prompt pool size (# tasks)
+- 20  # e-prompt. Set based on supplementary of (Liang & Li, 2024)
+- 6   # g-prompt. Set based on supplementary of (Liang & Li, 2024)
 
 # Optimizer
 optim: adam
-init_lr: 0.001 # set based on supplementary of Liang & Li (2024)
-lrate: 0.001   # set based on supplementary of Liang & Li (2024)
+init_lr: 0.001  # set based on supplementary of Liang & Li (2024)
+lrate: 0.001    # set based on supplementary of Liang & Li (2024)
 init_weight_decay: 0
 weight_decay: 0
 

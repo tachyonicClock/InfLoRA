@@ -11,3 +11,4 @@ ipykernel
 pandas
 matplotlib
 seaborn
+Jinja2

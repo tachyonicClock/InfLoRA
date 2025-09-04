@@ -1,0 +1,18 @@
+#!/bin/bash -e
+#SBATCH --job-name={{dataset}}_{{method}}
+#SBATCH --time=00:10:00
+#SBATCH --mem=4G
+#SBATCH --cpus-per-task=4
+#SBATCH --qos=debug
+#SBATCH --gpus-per-node=L4:1
+#SBATCH --output=logs/{{dataset}}_{{method}}.out
+#SBATCH --error=logs/{{dataset}}_{{method}}.err
+
+module load Miniconda3
+export PATH=${HOME}/nobackup/pyvenv/inflora/bin:${PATH}
+
+set -x # Echo commands to stdout
+set -e # Exit on error
+
+python main.py --device 0 --config configs/{{dataset}}_{{method}}.yaml
+

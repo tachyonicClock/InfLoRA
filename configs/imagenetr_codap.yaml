@@ -1,6 +1,6 @@
 # Training
-# epochs: 20      # full experiment
-# init_epoch: 20  # full experiment
+# epochs: 50      # full experiment
+# init_epoch: 50  # full experiment
 # seed: [0,1,2,3,4] # full experiment
 epochs: 1     # short test
 init_epoch: 1 # short test
@@ -16,10 +16,10 @@ memory_size: 0
 # Scenario:
 total_sessions: 10
 shuffle: false
-init_cls: 10
-increment: 10
-dataset: cifar100
-data_path: data/
+init_cls: 20
+increment: 20
+dataset: ImageNet_R
+data_path: data/imagenet-r
 
 # Model
 embd_dim: 768

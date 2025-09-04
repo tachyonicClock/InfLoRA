@@ -1,0 +1,46 @@
+# Training
+# epochs: 50      # full experiment
+# init_epoch: 50  # full experiment
+# seed: [0,1,2,3,4] # full experiment
+epochs: 1     # short test
+init_epoch: 1 # short test
+seed: [0]     # short test
+batch_size: 128
+num_workers: 4
+
+# No Replay:
+fixed_memory: true
+memory_per_class: 0
+memory_size: 0
+
+# Scenario:
+total_sessions: 10
+shuffle: false
+init_cls: 20
+increment: 20
+dataset: ImageNet_R
+data_path: data/imagenet-r
+
+# Model
+embd_dim: 768
+net_type: sip
+num_heads: 12
+
+# Method
+model_name: InfLoRA
+model_name: sprompts_dual
+prompt_param:
+- 10   # e-prompt pool size (# tasks)
+- 20  # e-prompt. Set based on supplementary of (Liang & Li, 2024)
+- 6   # g-prompt. Set based on supplementary of (Liang & Li, 2024)
+
+# Optimizer
+optim: adam
+init_lr: 0.001  # set based on supplementary of Liang & Li (2024)
+lrate: 0.001    # set based on supplementary of Liang & Li (2024)
+init_weight_decay: 0
+weight_decay: 0
+
+# Other settings
+EPSILON: 1.0e-08
+prefix: reproduce

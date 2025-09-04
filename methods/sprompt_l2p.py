@@ -27,7 +27,7 @@ class SPrompts_l2p(BaseLearner):
         self.EPSILON = args["EPSILON"]
         self.init_epoch = args["init_epoch"]
         self.init_lr = args["init_lr"]
-        self.init_lr_decay = args["init_lr_decay"]
+        # self.init_lr_decay = args["init_lr_decay"]
         self.init_weight_decay = args["init_weight_decay"]
         self.epochs = args["epochs"]
         self.lrate = args["lrate"]
@@ -85,6 +85,17 @@ class SPrompts_l2p(BaseLearner):
         # self.clustering(self.train_loader)
         if len(self._multiple_gpus) > 1:
             self._network = self._network.module
+
+    def predict(self, x: torch.Tensor) -> torch.Tensor:
+        feature = self._network.extract_vector(x)
+        y_hat = self._network.interface(x, feature)
+        # pad with zeros if < self._max_classes
+        if y_hat.shape[1] < self._max_classes:
+            padding = torch.zeros(
+                y_hat.shape[0], self._max_classes - y_hat.shape[1]
+            ).to(self._device)
+            y_hat = torch.cat((y_hat, padding), dim=1)
+        return y_hat
 
     def _train(self, train_loader, test_loader):
         self._network.to(self._device)

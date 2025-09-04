@@ -9,15 +9,13 @@ from sklearn.cluster import KMeans
 from torch import optim
 from torch.nn import functional as F
 from torch.utils.data import DataLoader
+from torchmetrics.classification import MulticlassCalibrationError
 from tqdm import tqdm
 
 from methods.base import BaseLearner
 from models.sinet_inflora import SiNet
 from models.vit_inflora import Attention_LoRA
 from utils.schedulers import CosineSchedule
-import ipdb
-import math
-from torchmetrics.classification import MulticlassCalibrationError
 
 
 class InfLoRA(BaseLearner):
@@ -291,7 +289,7 @@ class InfLoRA(BaseLearner):
                     break
 
             scheduler.step()
-            train_acc = np.around(tensor2numpy(correct) * 100 / total, decimals=2)
+            train_acc = np.around(correct * 100 / total, decimals=2)
 
             info = "Task {}, Epoch {}/{} => Loss {:.3f}, Train_accy {:.2f}".format(
                 self._cur_task,
@@ -396,7 +394,7 @@ class InfLoRA(BaseLearner):
             ).sum()
             total += len(targets)
 
-        return np.around(tensor2numpy(correct) * 100 / total, decimals=2)
+        return np.around(correct * 100 / total, decimals=2)
 
     def update_DualGPM(self, mat_list):
         threshold = (
