@@ -8,11 +8,8 @@
 #SBATCH --output=logs/imagenetr_dualprompt.out
 #SBATCH --error=logs/imagenetr_dualprompt.err
 
-module load Miniconda3
-source $(conda info --base)/etc/profile.d/conda.sh
-conda activate "$NESI_PYVENV/inflora"
-
 set -x # Echo commands to stdout
 set -e # Exit on error
 
+export PATH=$NESI_PYVENV/inflora/bin:$PATH
 python main.py --device 0 --config configs/imagenetr_dualprompt.yaml

@@ -8,11 +8,8 @@
 #SBATCH --output=logs/imagenetr_l2p.out
 #SBATCH --error=logs/imagenetr_l2p.err
 
-module load Miniconda3
-source $(conda info --base)/etc/profile.d/conda.sh
-conda activate "$NESI_PYVENV/inflora"
-
 set -x # Echo commands to stdout
 set -e # Exit on error
 
+export PATH=$NESI_PYVENV/inflora/bin:$PATH
 python main.py --device 0 --config configs/imagenetr_l2p.yaml
