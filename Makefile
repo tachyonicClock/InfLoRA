@@ -7,6 +7,11 @@ fmt:
 link:
 	ln -s ${ECS_SCRATCH}/log/inflora logs
 
+nesi-link:
+	mkdir ${HOME}/project/log/inflora
+	ln -s ${HOME}/project/log/inflora logs
+	ln -s ${HOME}/nobackup/datasets data
+
 generate-slurm:
 	python slurm/generate.py
 
