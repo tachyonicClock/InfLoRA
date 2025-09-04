@@ -9,6 +9,7 @@
 #SBATCH --error=logs/domainnet_l2p.err
 
 module load Miniconda3
+source $(conda info --base)/etc/profile.d/conda.sh
 conda activate "$NESI_PYVENV/inflora"
 
 set -x # Echo commands to stdout
