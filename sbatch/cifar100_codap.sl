@@ -5,11 +5,11 @@
 #SBATCH --cpus-per-task=4
 #SBATCH --qos=debug
 #SBATCH --gpus-per-node=L4:1
-#SBATCH --output=logs/cifar100_codap.out
-#SBATCH --error=logs/cifar100_codap.err
+#SBATCH --output=logs/cifar100_codap.log
+
+export PATH=$NESI_PYVENV/inflora/bin:$PATH
 
 set -x # Echo commands to stdout
 set -e # Exit on error
 
-export PATH=$NESI_PYVENV/inflora/bin:$PATH
 python main.py --device 0 --config configs/cifar100_codap.yaml

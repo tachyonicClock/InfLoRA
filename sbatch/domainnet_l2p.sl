@@ -5,11 +5,11 @@
 #SBATCH --cpus-per-task=4
 #SBATCH --qos=debug
 #SBATCH --gpus-per-node=L4:1
-#SBATCH --output=logs/domainnet_l2p.out
-#SBATCH --error=logs/domainnet_l2p.err
+#SBATCH --output=logs/domainnet_l2p.log
+
+export PATH=$NESI_PYVENV/inflora/bin:$PATH
 
 set -x # Echo commands to stdout
 set -e # Exit on error
 
-export PATH=$NESI_PYVENV/inflora/bin:$PATH
 python main.py --device 0 --config configs/domainnet_l2p.yaml
