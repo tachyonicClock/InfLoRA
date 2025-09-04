@@ -32,7 +32,7 @@ def train(args):
         torch.cuda.manual_seed_all(myseed)
 
 
-def secs_to_hhmmsss(seconds: float) -> str:
+def hhmmss(seconds: float) -> str:
     return time.strftime("%H:%M:%S", time.gmtime(seconds))
 
 
@@ -152,11 +152,11 @@ def _train(args):
         time_spent = float(np.sum(task_durations))
         remaining_time = avg_duration * (data_manager.nb_tasks - train_task_idx - 1)
         expected_duration = time_spent + remaining_time
-        logging.info(f"Duration:                    {secs_to_hhmmsss(time_spent)}")
-        logging.info(
-            f"Expected total duration:     {secs_to_hhmmsss(expected_duration)}"
-        )
-        logging.info(f"Expected remaining duration: {secs_to_hhmmsss(remaining_time)}")
+        logging.info("Durations (hh:mm:ss):")
+        logging.info(f"  Task:       {hhmmss(task_duration)}")
+        logging.info(f"  Total:      {hhmmss(time_spent)}")
+        logging.info(f"  Remaining:  {hhmmss(remaining_time)}")
+        logging.info(f"  Expected:   {hhmmss(expected_duration)}")
 
     record = cl_evaluator.result()
     with open(os.path.join(logfilename, "record.pkl"), "wb") as f:
