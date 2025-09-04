@@ -40,14 +40,15 @@ clean-logs:
 
 
 nesi-launch:
-	sbatch sbatch/cifar100_inflora.sl
-	sbatch sbatch/domainnet_inflora.sl
-	sbatch sbatch/imagenetr_inflora.sl
+	sbatch sbatch/cifar100_codap.sl
 	sbatch sbatch/cifar100_dualprompt.sl
+	sbatch sbatch/cifar100_inflora.sl
 	sbatch sbatch/cifar100_l2p.sl
 	sbatch sbatch/domainnet_codap.sl
 	sbatch sbatch/domainnet_dualprompt.sl
+	sbatch sbatch/domainnet_inflora.sl
 	sbatch sbatch/domainnet_l2p.sl
 	sbatch sbatch/imagenetr_codap.sl
 	sbatch sbatch/imagenetr_dualprompt.sl
+	sbatch sbatch/imagenetr_inflora.sl
 	sbatch sbatch/imagenetr_l2p.sl

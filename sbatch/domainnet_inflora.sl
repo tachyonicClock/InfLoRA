@@ -1,7 +1,7 @@
 #!/bin/bash -e
 #SBATCH --job-name=domainnet_inflora
 #SBATCH --time=03:00:00
-#SBATCH --mem=8G
+#SBATCH --mem=16G
 #SBATCH --cpus-per-task=4
 #SBATCH --gpus-per-node=L4:1
 #SBATCH --output=logs/domainnet_inflora.log
