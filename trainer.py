@@ -20,16 +20,11 @@ def train(args):
     device = copy.deepcopy(args["device"])
     device = device.split(",")
 
+    print("Seeds:", seed_list)
     for seed in seed_list:
         args["seed"] = seed
         args["device"] = device
         _train(args)
-
-    myseed = 42069  # set a random seed for reproducibility
-    torch.backends.cudnn.deterministic = True
-    torch.manual_seed(myseed)
-    if torch.cuda.is_available():
-        torch.cuda.manual_seed_all(myseed)
 
 
 def hhmmss(seconds: float) -> str:

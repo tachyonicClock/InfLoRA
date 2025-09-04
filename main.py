@@ -34,6 +34,7 @@ def setup_parser():
         default="./exps/finetune.json",
         help="Json file of settings.",
     )
+    parser.add_argument("--seed", type=int, nargs="+", default=[0])
     parser.add_argument("--device", type=str, default="0")
 
     # # optim
