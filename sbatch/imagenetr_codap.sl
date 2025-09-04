@@ -2,7 +2,7 @@
 #SBATCH --job-name=imagenetr_codap
 #SBATCH --time=03:00:00
 #SBATCH --mem=4G
-#SBATCH --cpus-per-task=4
+#SBATCH --cpus-per-task=2
 #SBATCH --gpus-per-node=L4:1
 #SBATCH --output=logs/imagenetr_codap.log
 
