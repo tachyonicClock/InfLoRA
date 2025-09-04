@@ -32,8 +32,12 @@ def train(args):
         torch.cuda.manual_seed_all(myseed)
 
 
+def secs_to_hhmmsss(seconds: float) -> str:
+    return time.strftime("%H:%M:%S", time.gmtime(seconds))
+
+
 def _train(args):
-    torch.set_float32_matmul_precision("high")
+    torch.set_float32_matmul_precision("medium")
 
     if args["model_name"] in [
         "InfLoRA",
@@ -100,8 +104,10 @@ def _train(args):
     )
 
     class_schedule = np.split(np.arange(0, num_classes), num_tasks)
+    task_durations: list[float] = []
 
     for train_task_idx in range(data_manager.nb_tasks):
+        time_start = time.time()
         logging.info("-" * 80)
         logging.info(
             "Training on task {}/{}".format(train_task_idx + 1, data_manager.nb_tasks)
@@ -111,15 +117,7 @@ def _train(args):
         logging.info(
             "Trainable params: {}".format(count_parameters(model._network, True))
         )
-        time_start = time.time()
         model.incremental_train(data_manager)
-        time_end = time.time()
-        duration = time_end - time_start
-
-        logging.info("Time:{}".format(duration))
-        # Predict how long it will take to finish all tasks
-        time_estimate = duration * (data_manager.nb_tasks - train_task_idx - 1)
-        logging.info("Estimated remaining time:{}".format(time_estimate))
 
         logging.info("Evaluating...")
         for test_task_idx in range(data_manager.nb_tasks):
@@ -144,6 +142,21 @@ def _train(args):
             model._network.state_dict(),
             os.path.join(logfilename, "task_{}.pth".format(int(train_task_idx))),
         )
+
+        # Track task duration
+        task_duration = time.time() - time_start
+        task_durations.append(task_duration)
+
+        # Estimate remaining time
+        avg_duration = float(np.mean(task_durations))
+        time_spent = float(np.sum(task_durations))
+        remaining_time = avg_duration * (data_manager.nb_tasks - train_task_idx - 1)
+        expected_duration = time_spent + remaining_time
+        logging.info(f"Duration:                    {secs_to_hhmmsss(time_spent)}")
+        logging.info(
+            f"Expected total duration:     {secs_to_hhmmsss(expected_duration)}"
+        )
+        logging.info(f"Expected remaining duration: {secs_to_hhmmsss(remaining_time)}")
 
     record = cl_evaluator.result()
     with open(os.path.join(logfilename, "record.pkl"), "wb") as f:
