@@ -1,3 +1,13 @@
+
+```bash
+conda create inflora python=3.10
+conda activate inflora
+pip install -r requirements.txt
+```
+
+
+
+
 # InfLoRA: Interference-Free Low-Rank Adaptation for Continual Learning
 ```
 ts -G 1 -m -L CIFAR100_inflora python main.py --device 0 --config configs/cifar100_inflora.yaml 

@@ -9,7 +9,7 @@
 #SBATCH --error=logs/imagenetr_inflora.err
 
 module load Miniconda3
-export PATH=${HOME}/nobackup/pyvenv/inflora/bin:${PATH}
+conda activate "$NESI_PYVENV/inflora"
 
 set -x # Echo commands to stdout
 set -e # Exit on error
