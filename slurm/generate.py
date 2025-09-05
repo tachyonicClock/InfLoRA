@@ -8,7 +8,7 @@ class Job:
     dataset: str
     duration: str
     method: str
-    memory: str = "4G"
+    memory: str = "8G"
 
 
 def main():
@@ -17,10 +17,10 @@ def main():
         Job("cifar100", "08:00:00" , "dualprompt"),
         Job("cifar100", "08:00:00" , "inflora"),
         Job("cifar100", "08:00:00" , "l2p"),
-        Job("domainnet", "12:00:00", "codap", memory="12G"),
-        Job("domainnet", "12:00:00", "dualprompt", memory="12G"),
-        Job("domainnet", "12:00:00", "inflora", memory="12G"),
-        Job("domainnet", "12:00:00", "l2p", memory="12G"),
+        Job("domainnet", "12:00:00", "codap", memory="16G"),
+        Job("domainnet", "12:00:00", "dualprompt", memory="16G"),
+        Job("domainnet", "12:00:00", "inflora", memory="16G"),
+        Job("domainnet", "12:00:00", "l2p", memory="16G"),
         Job("imagenetr", "13:00:00", "codap"),
         Job("imagenetr", "13:00:00", "dualprompt"),
         Job("imagenetr", "13:00:00", "inflora"),

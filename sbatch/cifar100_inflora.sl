@@ -1,7 +1,7 @@
 #!/bin/bash -e
 #SBATCH --job-name=cifar100_inflora
 #SBATCH --time=08:00:00
-#SBATCH --mem=4G
+#SBATCH --mem=8G
 #SBATCH --cpus-per-task=2
 #SBATCH --gpus-per-node=L4:1
 #SBATCH --output=logs/cifar100_inflora_%a.log
