@@ -1,11 +1,11 @@
 #!/bin/bash -e
 #SBATCH --job-name=cifar100_inflora
-#SBATCH --time=08:00:00
+#SBATCH --time=05:00:00
 #SBATCH --mem=8G
 #SBATCH --cpus-per-task=2
 #SBATCH --gpus-per-node=L4:1
 #SBATCH --output=logs/cifar100_inflora_%a.log
-#SBATCH --array=0-0
+#SBATCH --array=1-4
 
 export PATH=$NESI_PYVENV/inflora/bin:$PATH
 

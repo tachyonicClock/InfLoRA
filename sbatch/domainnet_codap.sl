@@ -1,11 +1,11 @@
 #!/bin/bash -e
 #SBATCH --job-name=domainnet_codap
-#SBATCH --time=12:00:00
+#SBATCH --time=09:00:00
 #SBATCH --mem=16G
 #SBATCH --cpus-per-task=2
 #SBATCH --gpus-per-node=L4:1
 #SBATCH --output=logs/domainnet_codap_%a.log
-#SBATCH --array=0-0
+#SBATCH --array=1-4
 
 export PATH=$NESI_PYVENV/inflora/bin:$PATH
 

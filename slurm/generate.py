@@ -13,18 +13,18 @@ class Job:
 
 def main():
     jobs = [
-        Job("cifar100", "08:00:00" , "codap"),
-        Job("cifar100", "08:00:00" , "dualprompt"),
-        Job("cifar100", "08:00:00" , "inflora"),
-        Job("cifar100", "08:00:00" , "l2p"),
-        Job("domainnet", "12:00:00", "codap", memory="16G"),
-        Job("domainnet", "12:00:00", "dualprompt", memory="16G"),
-        Job("domainnet", "12:00:00", "inflora", memory="16G"),
-        Job("domainnet", "12:00:00", "l2p", memory="16G"),
-        Job("imagenetr", "13:00:00", "codap"),
-        Job("imagenetr", "13:00:00", "dualprompt"),
-        Job("imagenetr", "13:00:00", "inflora"),
-        Job("imagenetr", "13:00:00", "l2p"),
+        Job("cifar100", "05:00:00" , "codap"),
+        Job("cifar100", "05:00:00" , "dualprompt"),
+        Job("cifar100", "05:00:00" , "inflora"),
+        Job("cifar100", "05:00:00" , "l2p"),
+        Job("domainnet", "09:00:00", "codap", memory="16G"),
+        Job("domainnet", "09:00:00", "dualprompt", memory="16G"),
+        Job("domainnet", "09:00:00", "inflora", memory="16G"),
+        Job("domainnet", "09:00:00", "l2p", memory="16G"),
+        Job("imagenetr", "09:00:00", "codap"),
+        Job("imagenetr", "09:00:00", "dualprompt"),
+        Job("imagenetr", "09:00:00", "inflora"),
+        Job("imagenetr", "09:00:00", "l2p"),
     ]
     env = Environment(loader=FileSystemLoader("slurm"))
     template = env.get_template("template.sl.jinja")
