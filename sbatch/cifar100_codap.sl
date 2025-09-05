@@ -4,7 +4,7 @@
 #SBATCH --mem=4G
 #SBATCH --cpus-per-task=2
 #SBATCH --gpus-per-node=L4:1
-#SBATCH --output=logs/cifar100_codap.log
+#SBATCH --output=logs/cifar100_codap_%a.log
 #SBATCH --array=0-0
 
 export PATH=$NESI_PYVENV/inflora/bin:$PATH

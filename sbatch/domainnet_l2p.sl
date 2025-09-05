@@ -4,7 +4,7 @@
 #SBATCH --mem=12G
 #SBATCH --cpus-per-task=2
 #SBATCH --gpus-per-node=L4:1
-#SBATCH --output=logs/domainnet_l2p.log
+#SBATCH --output=logs/domainnet_l2p_%a.log
 #SBATCH --array=0-0
 
 export PATH=$NESI_PYVENV/inflora/bin:$PATH
