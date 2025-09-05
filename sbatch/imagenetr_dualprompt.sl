@@ -1,6 +1,6 @@
 #!/bin/bash -e
 #SBATCH --job-name=imagenetr_dualprompt
-#SBATCH --time=03:00:00
+#SBATCH --time=13:00:00
 #SBATCH --mem=4G
 #SBATCH --cpus-per-task=2
 #SBATCH --gpus-per-node=L4:1

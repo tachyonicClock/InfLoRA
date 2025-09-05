@@ -6,25 +6,25 @@ from jinja2 import Environment, FileSystemLoader
 @dataclass
 class Job:
     dataset: str
+    duration: str
     method: str
     memory: str = "4G"
-    duration: str = "03:00:00"
 
 
 def main():
     jobs = [
-        Job("cifar100", "codap"),
-        Job("cifar100", "dualprompt"),
-        Job("cifar100", "inflora"),
-        Job("cifar100", "l2p"),
-        Job("domainnet", "codap", memory="16G"),
-        Job("domainnet", "dualprompt", memory="16G"),
-        Job("domainnet", "inflora", memory="16G"),
-        Job("domainnet", "l2p", memory="16G"),
-        Job("imagenetr", "codap"),
-        Job("imagenetr", "dualprompt"),
-        Job("imagenetr", "inflora"),
-        Job("imagenetr", "l2p"),
+        Job("cifar100", "08:00:00" , "codap"),
+        Job("cifar100", "08:00:00" , "dualprompt"),
+        Job("cifar100", "08:00:00" , "inflora"),
+        Job("cifar100", "08:00:00" , "l2p"),
+        Job("domainnet", "12:00:00", "codap", memory="12G"),
+        Job("domainnet", "12:00:00", "dualprompt", memory="12G"),
+        Job("domainnet", "12:00:00", "inflora", memory="12G"),
+        Job("domainnet", "12:00:00", "l2p", memory="12G"),
+        Job("imagenetr", "13:00:00", "codap"),
+        Job("imagenetr", "13:00:00", "dualprompt"),
+        Job("imagenetr", "13:00:00", "inflora"),
+        Job("imagenetr", "13:00:00", "l2p"),
     ]
     env = Environment(loader=FileSystemLoader("slurm"))
     template = env.get_template("template.sl.jinja")
