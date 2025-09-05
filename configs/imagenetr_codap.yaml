@@ -1,9 +1,9 @@
 # Training
-# epochs: 50      # full experiment
-# init_epoch: 50  # full experiment
+epochs: 50      # full experiment
+init_epoch: 50  # full experiment
 
-epochs: 1     # short test
-init_epoch: 1 # short test
+# epochs: 1     # short test
+# init_epoch: 1 # short test
 
 batch_size: 128
 num_workers: 3
